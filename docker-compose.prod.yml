@@ -1,0 +1,46 @@
+# Full containerized stack for a deployment target (not local hot-reload dev —
+# use docker-compose.yml + `uvicorn --reload` / `npm run dev` for that).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# This file ADDS the backend and frontend services on top of the db/minio
+# services already defined in docker-compose.yml.
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend.Dockerfile
+    container_name: cot_backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Inside the Docker network, the DB and MinIO are reached by service
+      # name, not localhost — override whatever .env has for local dev.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-chain_of_truth}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env (see .env.example)}@db:5432/${POSTGRES_DB:-chain_of_truth}
+      S3_ENDPOINT_URL: http://minio:9000
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend.Dockerfile
+      args:
+        # Baked into the bundle at build time (see docker/frontend.Dockerfile).
+        # These are the URLs the BROWSER uses, so they must be reachable from
+        # the user's machine — Docker service names like `backend` are not.
+        # A bare "/api/v1" was wrong here: nginx in the frontend image serves
+        # static files only and does not proxy /api anywhere, so every request
+        # 404'd. Change these to your public backend URL for a real deployment.
+        VITE_API_BASE_URL: http://localhost:8000/api/v1
+        VITE_WS_BASE_URL: ws://localhost:8000/api/v1/ws
+    container_name: cot_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"

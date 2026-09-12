@@ -1,0 +1,8 @@
+# node_modules is reinstalled inside the image; shipping the host copy as
+# build context is slow and can smuggle in platform-specific binaries.
+node_modules/
+dist/
+.vite/
+.env
+.env.local
+.git/
