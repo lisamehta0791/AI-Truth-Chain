@@ -4,7 +4,7 @@
 
 > AI assists investigators — it does not determine guilt. Every AI output is a hypothesis until an officer confirms it, and every confirmation is logged.
 
-**Presentation:** [`docs/Chain_of_Truth_Deck.pptx`](docs/Chain_of_Truth_Deck.pptx) · **Demo video:** _(link to be added)_
+**Presentation:** [`docs/Chain_of_Truth_Deck.pptx`](docs/Chain_of_Truth_Deck.pptx) · **Demo video:** <https://youtu.be/w0_ygtt7hr0>
 
 ![Command Center](docs/screenshots/02-command-center.jpg)
 
